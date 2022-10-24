@@ -23,9 +23,9 @@ def next_step_handler(message, bot: TeleBot):
 
     connection = DataBaseConnector.get_connection()
     sql_request = (
-        'INSERT INTO {}'.format(PRODUCTS_TABLE_NAME) +
-        data_class.select_values_string() +
-        'VALUES {}'.format(data_class.insert_values_string())
+        'INSERT INTO {} '.format(PRODUCTS_TABLE_NAME) +
+        data_class.insert_values_string() +
+        ' VALUES {}'.format(data_class.insert_values_to_string())
     )
     try:
         DataBaseConnector.insert(connection=connection, sql_request=sql_request)

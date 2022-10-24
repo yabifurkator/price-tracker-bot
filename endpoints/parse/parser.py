@@ -1,12 +1,15 @@
-from dataclasses import dataclass
+from enum import Enum
 
-from exceptions import FailedParseException
-from mydataclasses import \
+from .exceptions import \
+    UnknownCompetitorException, \
+    ParseException
+
+from .mydataclasses import \
     Competitor, \
     ParseData, \
     Price
 
-from parsers import \
+from .parsers import \
     ulybka_radugi_parser, \
     novex_parser, \
     podrugka_parser, \
@@ -25,8 +28,7 @@ from parsers import \
     magnit_cosmetic_parser
 
 
-@dataclass
-class Competitors:
+class Competitors(Enum):
     ULYBKA_RADUGI = Competitor(
         url='https://www.r-ulybka.ru/',
         name='Улыбка радуги',
@@ -111,24 +113,18 @@ class Competitors:
 
 def define_competitor(url):
     for competitor in Competitors:
-        if competitor.url in url:
-            return competitor
+        competitor_dataclass: Competitor = competitor.value
+        if competitor_dataclass.url in url:
+            return competitor.value
     return None
 
 
 def parse(url):
     competitor: Competitor = define_competitor(url)
     if competitor is None:
-        raise FailedParseException(
-            reason='URL-адрес не совпадает ни с одним URL-адресом конкурента',
-            url=url
-        )
+        raise UnknownCompetitorException(url=url)
 
     default_price, promo_price = competitor.parser(url)
-
-    #competitor = Competitors.MAGNIT.name
-    #default_price = Price()
-    #promo_price = Price()
 
     parse_data = ParseData(
         competitor_name=competitor.name,

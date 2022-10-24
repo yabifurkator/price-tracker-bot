@@ -14,10 +14,14 @@ class Product:
     sku: str
     url: str
 
-    def __init__(self, line):
-        self.barcode = line[0]
-        self.sku = line[1]
-        self.url = line[2]
+    @staticmethod
+    def init_by_line(line):
+        product = Product(
+            barcode=line[0],
+            sku=line[1],
+            url=line[2]
+        )
+        return product
 
     @staticmethod
     def select_values_string():
@@ -27,7 +31,15 @@ class Product:
             url_column_name=PRODUCTS_TABLE_URL_COLUMN_NAME
         )
 
-    def insert_values_string(self):
+    @staticmethod
+    def insert_values_string():
+        return '({barcode_column_name}, {sku_column_name}, {url_column_name}) '.format(
+            barcode_column_name=PRODUCTS_TABLE_BARCODE_COLUMN_NAME,
+            sku_column_name=PRODUCTS_TABLE_SKU_COLUMN_NAME,
+            url_column_name=PRODUCTS_TABLE_URL_COLUMN_NAME
+        )
+
+    def insert_values_to_string(self):
         return '({barcode}, {sku}, {url})'.format(
             barcode=("'" + self.barcode + "'"),
             sku=("'" + self.sku + "'"),
@@ -35,7 +47,7 @@ class Product:
         )
     
     @staticmethod
-    def get_data_header():
+    def get_excel_data_header():
         return ['Штрих-Код', 'SKU', 'URL-адрес']
 
     def __iter__(self):

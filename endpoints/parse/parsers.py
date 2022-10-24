@@ -3,8 +3,8 @@ import json
 import re
 from bs4 import BeautifulSoup
 
-from mydataclasses import Price
-from exceptions import \
+from .mydataclasses import Price
+from .exceptions import \
     RequestException, \
     UnexpectedPageStructureException, \
     FailedToGetJsonException, \

@@ -28,7 +28,7 @@ def list_endpoint_impl(bot: TeleBot, message):
     excel = openpyxl.Workbook()
     sheet = excel.active
     sheet.title = 'Отслеживаемые товары'
-    sheet.append(Product.get_data_header())
+    sheet.append(Product.get_excel_data_header())
     for line in select_response:
         sheet.append(line)
 

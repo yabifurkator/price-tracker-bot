@@ -12,6 +12,14 @@ class ParseException(Exception):
         super().__init__(message)
 
 
+class UnknownCompetitorException(ParseException):
+    def __init__(self, url):
+        super().__init__(
+            reason='URL-адрес не совпадает ни с одним URL-адресом конкурента',
+            url=url
+        )
+
+
 class RequestException(ParseException):
     def __init__(self, url):
         super().__init__(
