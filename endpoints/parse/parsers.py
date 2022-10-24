@@ -69,6 +69,7 @@ def magnit_cosmetic_parser(url):
 
     try:
         json_odj = json.loads(request.text)
+        print(json_odj)
         price = [int(part) for part in json_odj['data'][0]['price'].split('.')]
     except json.JSONDecodeError:
         raise FailedToGetJsonException(url=url)
@@ -352,6 +353,18 @@ def parfum_lider_parser(url):
             new_price = str(json_obj['PRICE'])
             old_price = str(json_obj['PRICE_OLD'])
             break
+
+    def convert_price(price: str):
+        if len(price.split('.')) == 1:
+            price = price + '.00'
+            return price
+        cop = price.split('.')[1]
+        if len(cop) == 1:
+            cop = cop + '0'
+            price = price.split('.')[0] + '.' + cop
+            return price
+        return price
+
     if new_price is None and old_price is None:
         raise UnexpectedPageStructureException(url=url)
 
