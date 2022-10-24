@@ -24,6 +24,6 @@ class Price:
 
 @dataclass
 class ParseData:
-    competitor: str
+    competitor_name: str
     default_price: Price
     promo_price: Price

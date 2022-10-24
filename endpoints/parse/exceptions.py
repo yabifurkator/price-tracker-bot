@@ -1,5 +1,5 @@
 
-class FailedParseException(Exception):
+class ParseException(Exception):
     def __init__(self, reason, url):
         self.reason = reason
         self.url = url
@@ -10,3 +10,35 @@ class FailedParseException(Exception):
             'URL-адрес: ' + url
         )
         super().__init__(message)
+
+
+class RequestException(ParseException):
+    def __init__(self, url):
+        super().__init__(
+            reason='не удалось сделать запрос на указанный URL-адрес',
+            url=url
+        )
+
+
+class UnexpectedPageStructureException(ParseException):
+    def __init__(self, url):
+        super().__init__(
+            reason='неожиданная структура страницы',
+            url=url
+        )
+
+
+class FailedToGetJsonException(ParseException):
+    def __init__(self, url):
+        super().__init__(
+            reason='не удалось получить JSON объект',
+            url=url
+        )
+
+
+class ProductNotAvailableException(ParseException):
+    def __init__(self, url):
+        super().__init__(
+            reason='не удалось получить актуальную цену товара, возможно его нет в наличии',
+            url=url
+        )

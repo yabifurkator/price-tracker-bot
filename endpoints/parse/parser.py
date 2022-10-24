@@ -131,7 +131,7 @@ def parse(url):
     #promo_price = Price()
 
     parse_data = ParseData(
-        competitor=competitor,
+        competitor_name=competitor.name,
         default_price=default_price,
         promo_price=promo_price
     )
