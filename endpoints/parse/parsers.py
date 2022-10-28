@@ -1,4 +1,5 @@
 import requests
+import urllib3
 import json
 import re
 from bs4 import BeautifulSoup
@@ -12,11 +13,12 @@ from .exceptions import \
 
 
 def magnit_cosmetic_parser(url):
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     headers = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36'
     }
     try:
-        request = requests.post(url=url, headers=headers)
+        request = requests.post(url=url, headers=headers, verify=False)
     except requests.exceptions.RequestException:
         raise RequestException(url=url)
 
@@ -63,13 +65,15 @@ def magnit_cosmetic_parser(url):
 
     url = 'https://magnitcosmetic.ru/local/ajax/load_remains/catalog_load_remains.php'
     try:
-        request = requests.request("POST", url, headers=headers, data=payload)
+        request = requests.request("POST", url, headers=headers, data=payload, verify=False)
     except requests.exceptions.RequestException:
         RequestException(url=url)
 
     try:
         json_odj = json.loads(request.text)
-        print(json_odj)
+        price = json_odj['data'][0]['price']
+        if price == 0:
+            raise ProductNotAvailableException(url=url)
         price = [int(part) for part in json_odj['data'][0]['price'].split('.')]
     except json.JSONDecodeError:
         raise FailedToGetJsonException(url=url)
@@ -161,13 +165,21 @@ def vprok_parser(url):
     p1 = s[0]
     p2 = s[1]
 
+    def convert_p(p):
+        if len(p) == 1:
+            p.append(0)
+        return p
+
     if "text-muted" in str(p1):
         p2 = [int(part) for part in s[1].text.split()[0].split('.')]
+        p2 = convert_p(p2)
         default_price = Price(p2[0], p2[1])
         promo_price = None
     else:
         p1 = [int(part) for part in s[0].text.split()[0].split('.')]
         p2 = [int(part) for part in s[1].text.split()[0].split('.')]
+        p1 = convert_p(p1)
+        p2 = convert_p(p2)
         default_price = Price(p2[0], p2[1])
         promo_price = Price(p1[0], p1[1])
 
@@ -176,7 +188,7 @@ def vprok_parser(url):
 
 def victoria_parser(url):
     try:
-        url = url[:-1]
+        # url = url[:-1]
         request = requests.get(url)
     except requests.exceptions.RequestException:
         raise RequestException(url=url)

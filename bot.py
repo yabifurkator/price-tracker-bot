@@ -11,22 +11,34 @@ bot = TeleBot(token=TOKEN)
 
 @bot.message_handler(commands=['add'])
 def add_endpoint(message):
-    add_endpoint_impl(bot=bot, message=message)
+    try:
+        add_endpoint_impl(bot=bot, message=message)
+    except Exception as ex:
+        bot.send_message(chat_id=message.chat.id, text=str(ex))
 
 
 @bot.message_handler(commands=['list'])
 def list_endpoint(message):
-    list_endpoint_impl(bot=bot, message=message)
+    try:
+        list_endpoint_impl(bot=bot, message=message)
+    except Exception as ex:
+        bot.send_message(chat_id=message.chat.id, text=str(ex))
 
 
 @bot.message_handler(commands=['delete'])
 def delete_endpoint(message):
-    delete_endpoint_impl(bot=bot, message=message)
+    try:
+        delete_endpoint_impl(bot=bot, message=message)
+    except Exception as ex:
+        bot.send_message(chat_id=message.chat.id, text=str(ex))
 
 
 @bot.message_handler(commands=['parse'])
 def parse_endpoint(message):
-    parse_endpoint_impl(bot=bot, message=message)
+    try:
+        parse_endpoint_impl(bot=bot, message=message)
+    except Exception as ex:
+        bot.send_message(chat_id=message.chat.id, text=str(ex))
 
 
 def main():

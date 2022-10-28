@@ -21,6 +21,7 @@ from config import \
 
 
 def parse_endpoint_impl(bot: TeleBot, message):
+    bot.send_message(message.chat.id, 'Начало парсинга, ждите...')
     connection = DataBaseConnector.get_connection()
     sql_request = (
         'SELECT {}'.format(Product.select_values_string()) +
@@ -62,6 +63,15 @@ def parse_endpoint_impl(bot: TeleBot, message):
                 date=get_current_date(),
                 reason=ex.reason,
                 url=ex.url
+            )
+            errors_lines.append(error_line)
+        except Exception as ex:
+            error_line = ErrorLine(
+                barcode=product.barcode,
+                sku=product.sku,
+                date=get_current_date(),
+                reason=str(ex),
+                url=product.url
             )
             errors_lines.append(error_line)
 
