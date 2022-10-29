@@ -21,7 +21,12 @@ def next_step_handler(message, bot: TeleBot):
         bot.reply_to(message=message, text=ex)
         return
 
-    connection = DataBaseConnector.get_connection()
+    try:
+        connection = DataBaseConnector.get_connection()
+    except Exception as ex:
+        bot.send_message(chat_id=message.chat.id, text=str(ex))
+        return
+
     sql_request = (
         'INSERT INTO {} '.format(PRODUCTS_TABLE_NAME) +
         data_class.insert_values_string() +
