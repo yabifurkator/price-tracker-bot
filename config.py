@@ -19,4 +19,6 @@ LIST_PRODUCTS_EXCEL_FILE_NAME = 'products.xlsx'
 PRICES_EXCEL_FILE_NAME = 'prices.xlsx'
 ERRORS_EXCEL_FILE_NAME = 'errors.xlsx'
 
+PRICES_ALL_FILE_NAME = 'prices_all.xlsx'
+
 NONE_PRICE_PLACEHOLDER = '-'

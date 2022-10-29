@@ -20,8 +20,7 @@ from config import \
     ERRORS_EXCEL_FILE_NAME
 
 
-def parse_endpoint_impl(bot: TeleBot, message):
-    bot.send_message(message.chat.id, 'Начало парсинга, ждите...')
+def get_excel():
     connection = DataBaseConnector.get_connection()
     sql_request = (
         'SELECT {}'.format(Product.select_values_string()) +
@@ -87,23 +86,35 @@ def parse_endpoint_impl(bot: TeleBot, message):
     for line in errors_lines:
         errors_sheet.append(line.to_excel_line())
 
-    prices_xlsx.save(PRICES_EXCEL_FILE_NAME)
-    errors_xlsx.save(ERRORS_EXCEL_FILE_NAME)
+    return prices_xlsx, errors_xlsx
 
-    with open(PRICES_EXCEL_FILE_NAME, 'rb') as prices_xlsx_file, \
-         open(ERRORS_EXCEL_FILE_NAME, 'rb') as errors_xlsx_file:
-        bot_message = bot.send_document(
-            chat_id=message.chat.id,
-            document=prices_xlsx_file,
-            caption='Актуальная таблица с ценами',
-            reply_to_message_id=message.id
-        )
-        bot.send_document(
-            chat_id=message.chat.id,
-            document=errors_xlsx_file,
-            caption='Возникшие в ходе получения актуальных цен ошибки',
-            reply_to_message_id=bot_message.id
-        )
 
-    os.remove(PRICES_EXCEL_FILE_NAME)
-    os.remove(ERRORS_EXCEL_FILE_NAME)
+def parse_endpoint_impl(bot: TeleBot, message):
+    bot.send_message(message.chat.id, 'Начало парсинга, ждите...')
+
+    try:
+        prices_xlsx, errors_xlsx = get_excel()
+        prices_xlsx.save(PRICES_EXCEL_FILE_NAME)
+
+        errors_xlsx.save(ERRORS_EXCEL_FILE_NAME)
+
+        with open(PRICES_EXCEL_FILE_NAME, 'rb') as prices_xlsx_file, \
+             open(ERRORS_EXCEL_FILE_NAME, 'rb') as errors_xlsx_file:
+            bot_message = bot.send_document(
+                chat_id=message.chat.id,
+                document=prices_xlsx_file,
+                caption='Актуальная таблица с ценами',
+                reply_to_message_id=message.id
+            )
+            bot.send_document(
+                chat_id=message.chat.id,
+                document=errors_xlsx_file,
+                caption='Возникшие в ходе получения актуальных цен ошибки',
+                reply_to_message_id=bot_message.id
+            )
+
+        os.remove(PRICES_EXCEL_FILE_NAME)
+        os.remove(ERRORS_EXCEL_FILE_NAME)
+    except Exception as ex:
+        bot.reply_to(message=message, text=str(ex))
+        return
