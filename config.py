@@ -2,6 +2,8 @@ import os
 
 TOKEN = os.environ['BK_PRICE_TRACKER_BOT_TOKEN']
 
+TELEGRAM_ID_LIST_FILE_PATH = 'telegram-id-list.txt'
+
 DATABASE_NAME = 'testdb'
 DATABASE_USER_NAME = 'leonidpsql'
 DATABASE_USER_PASSWORD = 'password'
