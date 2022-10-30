@@ -20,7 +20,7 @@ from config import \
     ERRORS_EXCEL_FILE_NAME
 
 
-def get_excel():
+def get_excel(bot: TeleBot=None, message=None):
     connection = DataBaseConnector.get_connection()
     sql_request = (
         'SELECT {}'.format(Product.select_values_string()) +
@@ -37,7 +37,22 @@ def get_excel():
     def get_current_date():
         return datetime.today().strftime('%m/%d/%Y')
 
+    if bot:
+        edit_message_template = 'Прогресс: {current}\\' + str(len(select_response))
+        text_to_send = edit_message_template.format(current=0)
+        edit_message = bot.reply_to(message=message, text=text_to_send)
+
+    line_counter = 0
     for line in select_response:
+        if bot:
+            line_counter += 1
+            text_to_send = edit_message_template.format(current=line_counter)
+            bot.edit_message_text(
+                chat_id=edit_message.chat.id,
+                message_id=edit_message.message_id,
+                text=text_to_send
+            )
+
         product = Product.init_by_line(line)
         try:
             parse_data: ParseData = parse(product.url)
@@ -86,10 +101,10 @@ def get_excel():
 
 
 def parse_endpoint_impl(bot: TeleBot, message):
-    bot.send_message(message.chat.id, 'Начало парсинга, ждите...')
+    bot_message = bot.send_message(message.chat.id, 'Начало парсинга, ждите...')
 
     try:
-        prices_xlsx, errors_xlsx = get_excel()
+        prices_xlsx, errors_xlsx = get_excel(bot=bot, message=bot_message)
         prices_xlsx.save(PRICES_EXCEL_FILE_NAME)
 
         errors_xlsx.save(ERRORS_EXCEL_FILE_NAME)

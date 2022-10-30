@@ -36,7 +36,11 @@ def next_step_handler(message, bot: TeleBot):
         try:
             DataBaseConnector.insert(connection=connection, sql_request=sql_request)
         except FailedToInsertException as ex:
-            bot.reply_to(message=message, text=ex)
+            text_to_send = (
+                str(ex) + '\n'
+                'URL-адрес: {}'.format(product.url)
+            )
+            bot.reply_to(message=message, text=text_to_send)
             continue
 
         text_to_send = (

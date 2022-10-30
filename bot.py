@@ -7,6 +7,8 @@ from config import \
     TOKEN, \
     TELEGRAM_ID_LIST_FILE_PATH
 
+from endpoints.start.start import start_endpoint_impl
+from endpoints.help.help import help_endpoint_impl
 from endpoints.add.add import add_endpoint_impl
 from endpoints.list.list import list_endpoint_impl
 from endpoints.delete.delete import delete_endpoint_impl
@@ -18,6 +20,14 @@ from endpoints.get.get import get_endpoint_impl
 from schedule_tools import schedule_func
 
 bot = TeleBot(token=TOKEN)
+
+
+def start_endpoint(message):
+    start_endpoint_impl(bot=bot, message=message)
+
+
+def help_endpoint(message):
+    help_endpoint_impl(bot=bot, message=message)
 
 
 def add_endpoint(message):
@@ -52,6 +62,14 @@ def get_endpoint(message):
     get_endpoint_impl(bot=bot, message=message)
 
 
+def unknown_endpoint(message):
+    text_to_send = (
+        'Неизвестная команда.\n'
+        'Введите \'/help\' для просмотра списка команд.'
+    )
+    bot.reply_to(message=message, text=text_to_send)
+
+
 def check_user(user_telegram_id):
     with open(TELEGRAM_ID_LIST_FILE_PATH, 'r') as file:
         for line in file:
@@ -76,6 +94,10 @@ def text_endpoint(message):
             return
 
         match message.text:
+            case '/start':
+                start_endpoint(message=message)
+            case '/help':
+                help_endpoint(message=message)
             case '/add':
                 add_endpoint(message=message)
             case '/list':
@@ -90,8 +112,10 @@ def text_endpoint(message):
                 deletesku_endpoint(message=message)
             case '/deletebarcode':
                 deletebarcode_endpoint(message=message)
-            case '/deletecompetitor':
-                deletecompetitor_endpoint(message=message)
+            # case '/deletecompetitor':
+            #     deletecompetitor_endpoint(message=message)
+            case _:
+                unknown_endpoint(message=message)
 
     except Exception as ex:
         bot.send_message(chat_id=message.chat.id, text=str(ex))
