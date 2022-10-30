@@ -1,6 +1,6 @@
 from telebot import TeleBot
 import openpyxl
-import os
+import io
 
 from database.database import DataBaseConnector
 from database.mydataclasses import Product
@@ -37,12 +37,16 @@ def list_endpoint_impl(bot: TeleBot, message):
     for line in select_response:
         sheet.append(line)
 
-    excel.save(LIST_PRODUCTS_EXCEL_FILE_NAME)
-    with open(LIST_PRODUCTS_EXCEL_FILE_NAME, 'rb') as file:
-        bot.send_document(
-            chat_id=message.chat.id,
-            document=file,
-            reply_to_message_id=message.id,
-            caption='Актуальный список товаров на отслеживании.'
-        )
-    os.remove(LIST_PRODUCTS_EXCEL_FILE_NAME)
+    excel_bytes_io = io.BytesIO()
+    excel.save(excel_bytes_io)
+
+    bot.send_document(
+        chat_id=message.chat.id,
+        document=excel_bytes_io.getbuffer(),
+        visible_file_name=LIST_PRODUCTS_EXCEL_FILE_NAME,
+        reply_to_message_id=message.id,
+        caption='Актуальный список товаров на отслеживании.'
+    )
+
+    excel.close()
+    excel_bytes_io.close()

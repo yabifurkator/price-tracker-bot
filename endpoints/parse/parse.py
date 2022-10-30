@@ -1,5 +1,6 @@
 from telebot import TeleBot
 import os
+import io
 from datetime import datetime
 import openpyxl
 
@@ -100,31 +101,36 @@ def get_excel(bot: TeleBot=None, message=None):
 
 
 def parse_endpoint_impl(bot: TeleBot, message):
-    bot_message = bot.send_message(message.chat.id, 'Начало парсинга, ждите...')
+    bot_message = bot.reply_to(message, 'Начало парсинга, ждите...')
 
     try:
         prices_xlsx, errors_xlsx = get_excel(bot=bot, message=bot_message)
-        prices_xlsx.save(PRICES_EXCEL_FILE_NAME)
 
-        errors_xlsx.save(ERRORS_EXCEL_FILE_NAME)
+        prices_xlsx_bytes_io = io.BytesIO()
+        errors_xlsx_bytes_io = io.BytesIO()
 
-        with open(PRICES_EXCEL_FILE_NAME, 'rb') as prices_xlsx_file, \
-             open(ERRORS_EXCEL_FILE_NAME, 'rb') as errors_xlsx_file:
-            bot_message = bot.send_document(
-                chat_id=message.chat.id,
-                document=prices_xlsx_file,
-                caption='Актуальная таблица с ценами',
-                reply_to_message_id=message.id
-            )
-            bot.send_document(
-                chat_id=message.chat.id,
-                document=errors_xlsx_file,
-                caption='Возникшие в ходе получения актуальных цен ошибки',
-                reply_to_message_id=bot_message.id
-            )
+        prices_xlsx.save(prices_xlsx_bytes_io)
+        errors_xlsx.save(errors_xlsx_bytes_io)
 
-        os.remove(PRICES_EXCEL_FILE_NAME)
-        os.remove(ERRORS_EXCEL_FILE_NAME)
+        bot_message = bot.send_document(
+            chat_id=message.chat.id,
+            document=prices_xlsx_bytes_io.getbuffer(),
+            caption='Актуальная таблица с ценами',
+            visible_file_name=PRICES_EXCEL_FILE_NAME,
+            reply_to_message_id=message.id
+        )
+        bot.send_document(
+            chat_id=message.chat.id,
+            document=errors_xlsx_bytes_io.getbuffer(),
+            caption='Возникшие в ходе получения актуальных цен ошибки',
+            visible_file_name=ERRORS_EXCEL_FILE_NAME,
+            reply_to_message_id=bot_message.id
+        )
+        prices_xlsx.close()
+        errors_xlsx.close()
+        prices_xlsx_bytes_io.close()
+        errors_xlsx_bytes_io.close()
+
     except Exception as ex:
         bot.reply_to(message=message, text=str(ex))
         return
