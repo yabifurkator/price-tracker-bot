@@ -16,7 +16,7 @@ from config import \
 def next_step_handler(message, bot: TeleBot):
     try:
         handler = Handler(text=message.text)
-        data_class = handler.products_table_data_class
+        products_list = handler.products
     except InputException as ex:
         bot.reply_to(message=message, text=ex)
         return
@@ -27,24 +27,25 @@ def next_step_handler(message, bot: TeleBot):
         bot.send_message(chat_id=message.chat.id, text=str(ex))
         return
 
-    sql_request = (
-        'INSERT INTO {} '.format(PRODUCTS_TABLE_NAME) +
-        data_class.insert_values_string() +
-        ' VALUES {}'.format(data_class.insert_values_to_string())
-    )
-    try:
-        DataBaseConnector.insert(connection=connection, sql_request=sql_request)
-    except FailedToInsertException as ex:
-        bot.reply_to(message=message, text=ex)
-        return
+    for product in products_list:
+        sql_request = (
+            'INSERT INTO {} '.format(PRODUCTS_TABLE_NAME) +
+            product.insert_values_string() +
+            ' VALUES {}'.format(product.insert_values_to_string())
+        )
+        try:
+            DataBaseConnector.insert(connection=connection, sql_request=sql_request)
+        except FailedToInsertException as ex:
+            bot.reply_to(message=message, text=ex)
+            continue
 
-    text_to_send = (
-        'Товар добавлен на отслеживание.\n\n'
-        'Штрих-Код: {}\n'.format(data_class.barcode) +
-        'SKU: {}\n'.format(data_class.sku) +
-        'URL-адрес: {}\n'.format(data_class.url)
-    )
-    bot.reply_to(message=message, text=text_to_send)
+        text_to_send = (
+            'Товар добавлен на отслеживание.\n\n'
+            'Штрих-Код: {}\n'.format(product.barcode) +
+            'SKU: {}\n'.format(product.sku) +
+            'URL-адрес: {}\n'.format(product.url)
+        )
+        bot.reply_to(message=message, text=text_to_send)
 
 
 def add_endpoint_impl(bot: TeleBot, message):
@@ -53,7 +54,7 @@ def add_endpoint_impl(bot: TeleBot, message):
         'Введите данные о товаре в следующем виде:\n'
         '1-я строка: Штрих-Код\n'
         '2-я строка: SKU\n'
-        '3-я строка: URL-адрес товара\n'
+        '3-я и последующие строки: URL-адрес товара\n'
     )
     next_step_handler_message = bot.reply_to(
         message=message,

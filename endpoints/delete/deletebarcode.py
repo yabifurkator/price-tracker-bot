@@ -7,7 +7,7 @@ from database.database import FailedToDeleteException
 
 from config import \
     PRODUCTS_TABLE_NAME, \
-    PRODUCTS_TABLE_URL_COLUMN_NAME
+    PRODUCTS_TABLE_BARCODE_COLUMN_NAME
 
 
 def next_step_handler(message, bot: TeleBot):
@@ -25,28 +25,29 @@ def next_step_handler(message, bot: TeleBot):
 
     sql_request = (
         'DELETE FROM {} '.format(PRODUCTS_TABLE_NAME) +
-        'WHERE {url_column_name}={user_input_url}'.format(
-            url_column_name=PRODUCTS_TABLE_URL_COLUMN_NAME,
-            user_input_url=("'" + message.text + "'")
+        'WHERE {barcode_column_name}={user_input_barcode}'.format(
+            barcode_column_name=PRODUCTS_TABLE_BARCODE_COLUMN_NAME,
+            user_input_barcode=("'" + message.text + "'")
         )
     )
     try:
-        DataBaseConnector.delete(connection=connection, sql_request=sql_request)
+        row_count = DataBaseConnector.delete(connection=connection, sql_request=sql_request)
     except FailedToDeleteException as ex:
         bot.reply_to(message=message, text=ex)
         return
 
     text_to_send = (
-        'Товар со следующим URL-адресом удалён с отслеживания:\n' +
-        message.text
+        'Товары со следующим Штрих-Кодом удалёны с отслеживания:\n' +
+        message.text + '\n'
+        'Удалено товаров: {}'.format(row_count)
     )
     bot.reply_to(message=message, text=text_to_send)
 
 
-def delete_endpoint_impl(bot: TeleBot, message):
+def deletebarcode_endpoint_impl(bot: TeleBot, message):
     text_to_send = (
         'Удаление товара с отслеживания.\n\n'
-        'Введите URL-адрес удаляемого товара...'
+        'Введите Штрих-Код удаляемых товаров...'
     )
     next_step_handler_message = bot.reply_to(
         message=message,

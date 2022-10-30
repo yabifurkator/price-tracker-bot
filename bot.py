@@ -6,9 +6,13 @@ import time
 from config import \
     TOKEN, \
     TELEGRAM_ID_LIST_FILE_PATH
+
 from endpoints.add.add import add_endpoint_impl
 from endpoints.list.list import list_endpoint_impl
 from endpoints.delete.delete import delete_endpoint_impl
+from endpoints.delete.deletesku import deletesku_endpoint_impl
+from endpoints.delete.deletebarcode import deletebarcode_endpoint_impl
+from endpoints.delete.deletecompetitor import deletecompetitor_endpoint_impl
 from endpoints.parse.parse import parse_endpoint_impl
 from endpoints.get.get import get_endpoint_impl
 from schedule_tools import schedule_func
@@ -28,11 +32,22 @@ def delete_endpoint(message):
     delete_endpoint_impl(bot=bot, message=message)
 
 
+def deletesku_endpoint(message):
+    deletesku_endpoint_impl(bot=bot, message=message)
+
+
+def deletebarcode_endpoint(message):
+    deletebarcode_endpoint_impl(bot=bot, message=message)
+
+
+def deletecompetitor_endpoint(message):
+    deletecompetitor_endpoint_impl(bot=bot, message=message)
+
+
 def parse_endpoint(message):
     parse_endpoint_impl(bot=bot, message=message)
 
 
-@bot.message_handler(commands=['get'])
 def get_endpoint(message):
     get_endpoint_impl(bot=bot, message=message)
 
@@ -71,6 +86,13 @@ def text_endpoint(message):
                 parse_endpoint(message=message)
             case '/get':
                 get_endpoint(message=message)
+            case '/deletesku':
+                deletesku_endpoint(message=message)
+            case '/deletebarcode':
+                deletebarcode_endpoint(message=message)
+            case '/deletecompetitor':
+                deletecompetitor_endpoint(message=message)
+
     except Exception as ex:
         bot.send_message(chat_id=message.chat.id, text=str(ex))
 

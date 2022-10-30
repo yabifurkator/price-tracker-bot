@@ -54,3 +54,4 @@ class DataBaseConnector:
         cursor = DataBaseConnector.execute(connection, sql_request)
         if cursor.rowcount == 0:
             raise FailedToDeleteException('не было найдено подходящих записей')
+        return cursor.rowcount

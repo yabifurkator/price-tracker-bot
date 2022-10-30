@@ -26,14 +26,10 @@ def get_excel():
         'SELECT {}'.format(Product.select_values_string()) +
         'FROM {}'.format(PRODUCTS_TABLE_NAME)
     )
-    try:
-        select_response = DataBaseConnector.select(
+    select_response = DataBaseConnector.select(
             connection=connection,
             sql_request=sql_request
-        )
-    except FailedToSelectException as ex:
-        bot.reply_to(message=message, text=ex)
-        return
+    )
 
     prices_lines = []
     errors_lines = []
