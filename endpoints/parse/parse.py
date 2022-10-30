@@ -44,15 +44,6 @@ def get_excel(bot: TeleBot=None, message=None):
 
     line_counter = 0
     for line in select_response:
-        if bot:
-            line_counter += 1
-            text_to_send = edit_message_template.format(current=line_counter)
-            bot.edit_message_text(
-                chat_id=edit_message.chat.id,
-                message_id=edit_message.message_id,
-                text=text_to_send
-            )
-
         product = Product.init_by_line(line)
         try:
             parse_data: ParseData = parse(product.url)
@@ -84,6 +75,14 @@ def get_excel(bot: TeleBot=None, message=None):
                 url=product.url
             )
             errors_lines.append(error_line)
+        if bot:
+            line_counter += 1
+            text_to_send = edit_message_template.format(current=line_counter)
+            bot.edit_message_text(
+                chat_id=edit_message.chat.id,
+                message_id=edit_message.message_id,
+                text=text_to_send
+            )
 
     prices_xlsx = openpyxl.Workbook()
     prices_sheet = prices_xlsx.active

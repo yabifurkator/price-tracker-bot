@@ -53,7 +53,7 @@ def next_step_handler(message, bot: TeleBot):
         try:
             DataBaseConnector.delete(connection=connection, sql_request=sql_request)
             row_count += 1
-        except DataBaseException as ex:
+        except Exception as ex:
             bot.reply_to(message=message, text=ex)
             return
 

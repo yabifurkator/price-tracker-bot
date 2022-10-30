@@ -26,7 +26,7 @@ def select_all_products(select_values_string):
 def list_endpoint_impl(bot: TeleBot, message):
     try:
         select_response = select_all_products(Product.select_values_string())
-    except FailedToSelectException as ex:
+    except Exception as ex:
         bot.reply_to(message=message, text=ex)
         return
 

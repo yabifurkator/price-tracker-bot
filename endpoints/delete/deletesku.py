@@ -32,7 +32,7 @@ def next_step_handler(message, bot: TeleBot):
     )
     try:
         row_count = DataBaseConnector.delete(connection=connection, sql_request=sql_request)
-    except FailedToDeleteException as ex:
+    except Exception as ex:
         bot.reply_to(message=message, text=ex)
         return
 
