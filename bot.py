@@ -126,7 +126,8 @@ def run_bot():
 
 
 def run_schedule():
-    schedule.every().monday.at('00:00').do(schedule_func)
+    schedule.every(25).seconds.do(schedule_func)
+    #schedule.every().monday.at('00:00').do(schedule_func)
     while True:
         schedule.run_pending()
         time.sleep(1)

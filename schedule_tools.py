@@ -1,28 +1,42 @@
+import os
+from datetime import datetime
 import openpyxl
 
 from endpoints.parse.parse import get_excel
-from endpoints.parse.mydataclasses import PriceLine
-from config import PRICES_ALL_FILE_NAME
+
+from config import \
+    PRICES_EXCEL_FILE_NAME, \
+    ERRORS_EXCEL_FILE_NAME, \
+    AUTOSAVE_PATH
 
 
 def schedule_func():
     try:
-        prices_all_excel = openpyxl.load_workbook(PRICES_ALL_FILE_NAME)
-    except FileNotFoundError:
-        prices_all_excel = openpyxl.Workbook()
-        prices_all_excel.active.append(PriceLine.get_excel_data_header())
+        prices_xlsx, errors_xlsx = get_excel()
 
-    prices_all_worksheet = prices_all_excel.active
-    prices_all_worksheet.title = 'Таблица'
+        try:
+            os.mkdir(AUTOSAVE_PATH)
+        except FileExistsError:
+            pass
 
-    excel, error_excel = get_excel()
+        date_format_string = '%m-%d-%Y'
 
-    excel_worksheet = excel.active
+        prices_xlsx_filename = (
+            datetime.today().strftime(date_format_string) +
+            '_' +
+            PRICES_EXCEL_FILE_NAME
+        )
+        errors_xlsx_filename = (
+            datetime.today().strftime(date_format_string) +
+            '_' +
+            ERRORS_EXCEL_FILE_NAME
+        )
 
-    iterator = iter(excel_worksheet)
-    next(iterator)
-    for line in iterator:
-        row = [cell.value for cell in line]
-        prices_all_worksheet.append(row)
+        prices_xlsx.save(os.path.join(AUTOSAVE_PATH, prices_xlsx_filename))
+        errors_xlsx.save(os.path.join(AUTOSAVE_PATH, errors_xlsx_filename))
 
-    prices_all_excel.save(PRICES_ALL_FILE_NAME)
+        prices_xlsx.close()
+        errors_xlsx.close()
+
+    except Exception as ex:
+        print(str(ex))

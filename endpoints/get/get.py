@@ -1,23 +1,71 @@
 from telebot import TeleBot
 
-from config import PRICES_ALL_FILE_NAME
+import io
+import glob
+import openpyxl
+from endpoints.parse.mydataclasses import \
+    PriceLine, \
+    ErrorLine
+from config import \
+    AUTOSAVE_PATH, \
+    PRICES_EXCEL_FILE_NAME, \
+    ERRORS_EXCEL_FILE_NAME
 
 
-def get_endpoint_impl(message, bot: TeleBot):
-    try:
-        file = open(PRICES_ALL_FILE_NAME, 'rb')
-        bot.send_document(
-            chat_id=message.chat.id,
-            document=file,
-            caption="Таблица данных"
-        )
-    except FileNotFoundError:
-        text_to_send = (
-            "Файл с таблицей данных не найден.\n"
-            "Скорее всего еще не было произведено ни одного сбора цен.\n\n"
-            "Чтобы посмотреть текущее состояние цен на данный момент напишите /parse\n"
-        )
-        bot.send_message(
-            chat_id=message.chat.id,
-            text=text_to_send
-        )
+def merge_xlsxlist_to_xlsx(xlsx_list, first_line):
+    xlsx_merged = openpyxl.Workbook()
+    xlsx_merged_sheet = xlsx_merged.active
+
+    xlsx_merged_sheet.append(first_line)
+    for xlsx in xlsx_list:
+        iterator = iter(xlsx.active)
+        next(iterator)
+        for line in iterator:
+            row = [cell.value for cell in line]
+            xlsx_merged_sheet.append(row)
+
+    return xlsx_merged
+
+
+def merge_xlsx(filename_pattern, first_line):
+    filelist = glob.glob(filename_pattern)
+    xlsx_list = []
+    for file in filelist:
+        xlsx = openpyxl.load_workbook(filename=file)
+        xlsx_list.append(xlsx)
+    xlsx_merged = merge_xlsxlist_to_xlsx(xlsx_list, first_line=first_line)
+    return xlsx_merged
+
+
+def send_xlsx(bot: TeleBot, message, xlsx: openpyxl.Workbook, visible_file_name):
+    xlsx_bytes = io.BytesIO()
+    xlsx.save(xlsx_bytes)
+    bot.send_document(
+        chat_id=message.chat.id,
+        document=xlsx_bytes.getbuffer(),
+        visible_file_name=visible_file_name
+    )
+
+
+def get_endpoint_impl(bot: TeleBot, message):
+    prices_xlsx_merged = merge_xlsx(
+        filename_pattern=AUTOSAVE_PATH + '/*{}'.format(PRICES_EXCEL_FILE_NAME),
+        first_line=PriceLine.get_excel_data_header()
+    )
+    errors_xlsx_merged = merge_xlsx(
+        filename_pattern=AUTOSAVE_PATH + '/*{}'.format(ERRORS_EXCEL_FILE_NAME),
+        first_line=ErrorLine.get_excel_data_header()
+    )
+
+    send_xlsx(
+        bot=bot,
+        message=message,
+        xlsx=prices_xlsx_merged,
+        visible_file_name='prices_merged.xlsx'
+    )
+    send_xlsx(
+        bot=bot,
+        message=message,
+        xlsx=errors_xlsx_merged,
+        visible_file_name='errors_merged.xlsx'
+    )

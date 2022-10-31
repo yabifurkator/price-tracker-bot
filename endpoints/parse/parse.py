@@ -1,11 +1,9 @@
 from telebot import TeleBot
-import os
 import io
 from datetime import datetime
 import openpyxl
 
 from database.database import DataBaseConnector
-from database.exceptions import FailedToSelectException
 from database.mydataclasses import Product
 from .parser import parse
 from .mydataclasses import \
@@ -18,7 +16,8 @@ from .exceptions import ParseException
 from config import \
     PRODUCTS_TABLE_NAME, \
     PRICES_EXCEL_FILE_NAME, \
-    ERRORS_EXCEL_FILE_NAME
+    ERRORS_EXCEL_FILE_NAME, \
+    DATE_FORMAT_STRING
 
 
 def get_excel(bot: TeleBot=None, message=None):
@@ -36,7 +35,7 @@ def get_excel(bot: TeleBot=None, message=None):
     errors_lines = []
 
     def get_current_date():
-        return datetime.today().strftime('%m/%d/%Y')
+        return datetime.today().strftime(DATE_FORMAT_STRING)
 
     if bot:
         edit_message_template = 'Прогресс: {current}\\' + str(len(select_response))

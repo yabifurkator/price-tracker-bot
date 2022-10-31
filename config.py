@@ -24,3 +24,11 @@ ERRORS_EXCEL_FILE_NAME = 'errors.xlsx'
 PRICES_ALL_FILE_NAME = 'prices_all.xlsx'
 
 NONE_PRICE_PLACEHOLDER = '-'
+
+# datetime.today().strftime(DATE_FORMAT_STRING)
+DATE_FORMAT_STRING = '%m/%d/%Y'
+AUTOSAVE_FOLDER_NAME = 'autosave'
+AUTOSAVE_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    AUTOSAVE_FOLDER_NAME
+)
