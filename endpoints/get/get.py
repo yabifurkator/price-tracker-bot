@@ -37,14 +37,17 @@ def merge_xlsx(filename_pattern, first_line):
     return xlsx_merged
 
 
-def send_xlsx(bot: TeleBot, message, xlsx: openpyxl.Workbook, visible_file_name):
+def send_xlsx(bot: TeleBot, message, xlsx: openpyxl.Workbook, visible_file_name, caption):
     xlsx_bytes = io.BytesIO()
     xlsx.save(xlsx_bytes)
-    bot.send_document(
+    bot_message = bot.send_document(
         chat_id=message.chat.id,
         document=xlsx_bytes.getbuffer(),
-        visible_file_name=visible_file_name
+        visible_file_name=visible_file_name,
+        reply_to_message_id=message.id,
+        caption=caption
     )
+    return bot_message
 
 
 def get_endpoint_impl(bot: TeleBot, message):
@@ -57,15 +60,17 @@ def get_endpoint_impl(bot: TeleBot, message):
         first_line=ErrorLine.get_excel_data_header()
     )
 
-    send_xlsx(
+    bot_message = send_xlsx(
         bot=bot,
         message=message,
         xlsx=prices_xlsx_merged,
-        visible_file_name='prices_merged.xlsx'
+        visible_file_name='prices_merged.xlsx',
+        caption='Результирующая таблица цен'
     )
     send_xlsx(
         bot=bot,
-        message=message,
+        message=bot_message,
         xlsx=errors_xlsx_merged,
-        visible_file_name='errors_merged.xlsx'
+        visible_file_name='errors_merged.xlsx',
+        caption='Результирующая таблица ошибок'
     )
