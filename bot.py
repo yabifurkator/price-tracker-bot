@@ -10,6 +10,8 @@ from config import \
 from endpoints.start.start import start_endpoint_impl
 from endpoints.help.help import help_endpoint_impl
 from endpoints.add.add import add_endpoint_impl
+from endpoints.add.addxlsx import addxlsx_endpoint_impl
+from endpoints.add.loadxlsx import loadxlsx_endpoint_impl
 from endpoints.list.list import list_endpoint_impl
 from endpoints.delete.delete import delete_endpoint_impl
 from endpoints.delete.deletesku import deletesku_endpoint_impl
@@ -32,6 +34,14 @@ def help_endpoint(message):
 
 def add_endpoint(message):
     add_endpoint_impl(bot=bot, message=message)
+
+
+def addxlsx_endpoint(message):
+    addxlsx_endpoint_impl(bot=bot, message=message)
+
+
+def loadxlsx_endpoint(message):
+    loadxlsx_endpoint_impl(bot=bot, message=message)
 
 
 def list_endpoint(message):
@@ -112,6 +122,10 @@ def text_endpoint(message):
                 deletesku_endpoint(message=message)
             case '/deletebarcode':
                 deletebarcode_endpoint(message=message)
+            case '/addxlsx':
+                addxlsx_endpoint(message=message)
+            case '/loadxlsx':
+                loadxlsx_endpoint(message=message)
             # case '/deletecompetitor':
             #     deletecompetitor_endpoint(message=message)
             case _:
